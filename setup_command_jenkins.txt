@@ -1,0 +1,9 @@
+mkdir BooksEcommerce_devops
+sudo dnf update -y
+cd BooksEcommerce_devops/
+sudo dnf install git -y
+sudo dnf install -y ansible
+chmod 600 /home/ec2-user/.ssh/fqts-demo-key.pem
+ls -l /home/ec2-user/.ssh/fqts-demo-key.pem
+
+
