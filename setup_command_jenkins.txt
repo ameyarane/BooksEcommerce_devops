@@ -5,5 +5,12 @@ sudo dnf install git -y
 sudo dnf install -y ansible
 chmod 600 /home/ec2-user/.ssh/fqts-demo-key.pem
 ls -l /home/ec2-user/.ssh/fqts-demo-key.pem
+git clone https://github.com/ameyarane/BooksEcommerce_devops.git
+ansible-playbook -i inventory.ini jenkins-setup.yml --check
+ansible-playbook -i inventory.ini jenkins-setup.yml
+sudo usermod -aG docker jenkins
+
+
+
 
 
