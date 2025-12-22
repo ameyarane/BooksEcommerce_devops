@@ -105,3 +105,19 @@
       ansible.builtin.debug:
         msg: "kubectl version: {{ kubectl_version.stdout }}"
 
+    - name: Display Docker service status
+      debug:
+        msg: "Docker service is {{ docker_status.stdout }}"      
+
+    - name: Permission to docker sock 
+      file: 
+        path: /var/run/docker.sock
+        state: file 
+        mode: 0777      
+    
+    - name: start docker on boot time 
+      service: 
+        name: docker 
+        enabled: yes
+      
+
