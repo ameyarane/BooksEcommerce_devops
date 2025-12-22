@@ -84,3 +84,15 @@
     - name: Show Jenkins initial admin password
       ansible.builtin.debug:
         msg: "Jenkins initial password is {{ jenkins_password.stdout | default('Use SSH to retrieve manually if not shown.') }}"
+    
+    - name: Install AWS CLI v2
+      ansible.builtin.dnf:
+        name: awscli
+        state: present
+
+    - name: Install kubectl
+      ansible.builtin.get_url:
+        url: https://s3.us-west-2.amazonaws.com/amazon-eks/1.27.4/2023-11-14/bin/linux/amd64/kubectl
+        dest: /usr/local/bin/kubectl
+        mode: '0755'
+
