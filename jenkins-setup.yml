@@ -1,0 +1,86 @@
+- name: Setup Jenkins and Docker on Amazon Linux 2023
+  hosts: jenkins
+  become: yes
+
+  tasks:
+    - name: Update all packages
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+
+    - name: Install Docker
+      ansible.builtin.dnf:
+        name: docker
+        state: present
+
+    - name: Enable and start Docker service
+      ansible.builtin.systemd_service:
+        name: docker
+        enabled: true
+        state: started
+
+    - name: Add ec2-user to docker group
+      ansible.builtin.user:
+        name: ec2-user
+        groups: docker
+        append: yes
+
+    - name: Install Java (required for Jenkins)
+      ansible.builtin.dnf:
+        name: java-17-amazon-corretto
+        state: present
+
+    - name: Add Jenkins repo
+      ansible.builtin.yum_repository:
+        name: jenkins
+        description: Jenkins repo
+        baseurl: http://pkg.jenkins.io/redhat-stable/
+        gpgcheck: no
+
+    - name: Install Jenkins
+      ansible.builtin.dnf:
+        name: jenkins
+        state: present
+
+    - name: Enable and start Jenkins service
+      ansible.builtin.systemd_service:
+        name: jenkins
+        enabled: true
+        state: started
+
+    - name: Ensure firewalld is installed
+      ansible.builtin.dnf:
+        name: firewalld
+        state: present
+
+    - name: Ensure firewalld is running
+      ansible.builtin.systemd_service:
+        name: firewalld
+        enabled: true
+        state: started
+
+    - name: Open Jenkins port 8080
+      ansible.posix.firewalld:
+        port: 8080/tcp
+        permanent: true
+        state: enabled
+        immediate: yes
+
+    - name: Open Docker port 2375 (optional, for remote API)
+      ansible.posix.firewalld:
+        port: 2375/tcp
+        permanent: true
+        state: enabled
+        immediate: yes
+
+    - name: Reload firewalld
+      ansible.builtin.command: firewall-cmd --reload
+
+    - name: Print Jenkins initial admin password location
+      ansible.builtin.shell: cat /var/lib/jenkins/secrets/initialAdminPassword
+      register: jenkins_password
+      ignore_errors: yes
+
+    - name: Show Jenkins initial admin password
+      ansible.builtin.debug:
+        msg: "Jenkins initial password is {{ jenkins_password.stdout | default('Use SSH to retrieve manually if not shown.') }}"
