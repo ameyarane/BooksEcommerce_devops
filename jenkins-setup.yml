@@ -111,5 +111,47 @@
         state: file 
         mode: 0777  
 
-      
+    - name: Import Microsoft GPG key for SQL Server
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://packages.microsoft.com/keys/microsoft.asc
+
+    - name: Add Microsoft SQL Server repo
+      ansible.builtin.yum_repository:
+        name: mssql-server
+        description: Microsoft SQL Server 2022 Repo
+        baseurl: https://packages.microsoft.com/rhel/8/mssql-server-2022/
+        enabled: yes
+        gpgcheck: yes
+
+    - name: Install SQL Server 2022
+      ansible.builtin.dnf:
+        name: mssql-server
+        state: present
+
+    - name: Install SQL Server tools
+      ansible.builtin.dnf:
+        name: mssql-tools
+        state: present
+
+    - name: Open SQL Server port 1433
+      ansible.posix.firewalld:
+        port: 1433/tcp
+        permanent: true
+        state: enabled
+        immediate: yes
+
+    - name: Configure SQL Server for unattended install
+      ansible.builtin.shell: |
+        MSSQL_PID=Express MSSQL_SA_PASSWORD='Cover@2025' /opt/mssql/bin/mssql-conf setup accept-eula
+      args:
+        creates: /var/opt/mssql/mssql.conf
+
+    - name: Enable and start SQL Server
+      ansible.builtin.systemd_service:
+        name: mssql-server
+        enabled: true
+        state: started
+    # SQL Server setup END
+
 
