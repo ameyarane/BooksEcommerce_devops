@@ -29,3 +29,70 @@
       ansible.builtin.debug:
         msg: "kubectl version: {{ kubectl_version.stdout }}"
       tags: install_kubectl
+
+    # ----- SQL Server and Tools Setup -----
+    - name: Import Microsoft GPG key for SQL Server
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://packages.microsoft.com/keys/microsoft.asc
+
+    - name: Add Microsoft SQL Server repo
+      ansible.builtin.yum_repository:
+        name: mssql-server
+        description: Microsoft SQL Server 2022 Repo
+        baseurl: https://packages.microsoft.com/rhel/8/mssql-server-2022/
+        enabled: yes
+        gpgcheck: yes
+
+    - name: Add Microsoft prod repo for mssql-tools
+      ansible.builtin.get_url:
+        url: https://packages.microsoft.com/config/rhel/8/prod.repo
+        dest: /etc/yum.repos.d/msprod.repo
+        mode: '0644'
+
+    - name: Install required dependencies for mssql-tools
+      ansible.builtin.dnf:
+        name:
+          - unixODBC
+          - unixODBC-devel
+        state: present
+
+    - name: Install SQL Server 2022
+      ansible.builtin.dnf:
+        name: mssql-server
+        state: present
+
+    - name: Install mssql-tools and msodbcsql17
+      ansible.builtin.dnf:
+        name:
+          - mssql-tools
+          - msodbcsql17
+        state: present
+        allow_downgrade: yes
+
+    - name: Open SQL Server port 1433
+      ansible.posix.firewalld:
+        port: 1433/tcp
+        permanent: true
+        state: enabled
+        immediate: yes
+
+    - name: Configure SQL Server for unattended install
+      ansible.builtin.shell: |
+        MSSQL_PID=Express MSSQL_SA_PASSWORD='Cover@2025' /opt/mssql/bin/mssql-conf setup accept-eula
+      args:
+        creates: /var/opt/mssql/mssql.conf
+
+    - name: Enable and start SQL Server
+      ansible.builtin.systemd_service:
+        name: mssql-server
+        enabled: true
+        state: started
+
+    - name: Add mssql-tools to PATH for all users
+      ansible.builtin.lineinfile:
+        path: /etc/profile.d/mssql-tools.sh
+        line: 'export PATH="$PATH:/opt/mssql-tools/bin"'
+        create: yes
+        mode: '0755'
+    # ----- SQL Server and Tools Setup END -----
