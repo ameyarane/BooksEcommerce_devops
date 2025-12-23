@@ -36,3 +36,5 @@ tags = {
   Environment = "dev"
   Owner       = "shocki"
 }
+
+iam_instance_profile   = "eks-admin-role"

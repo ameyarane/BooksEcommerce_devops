@@ -67,7 +67,7 @@ resource "aws_instance" "jenkins" {
   subnet_id     = var.subnet_ids[0]
   key_name      = var.ec2_ssh_key
   associate_public_ip_address = true
-
+  iam_instance_profile   = var.iam_instance_profile
   tags = {
     Name = "jenkins-server"
   }
