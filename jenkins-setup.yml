@@ -59,15 +59,18 @@
         remote_src: yes
         mode: '0644'
 
-    - name: Add Jenkins apt repository
-      ansible.builtin.apt_repository:
-        repo: 'deb https://pkg.jenkins.io/debian-stable binary/'
-        filename: 'jenkins'
-        state: present
+    - name: Add Jenkins apt repository file
+      ansible.builtin.copy:
+        dest: /etc/apt/sources.list.d/jenkins.list
+        content: "deb https://pkg.jenkins.io/debian-stable binary/\n"
+        owner: root
+        group: root
+        mode: '0644'
 
     - name: Update apt cache after adding Jenkins repo
       ansible.builtin.apt:
         update_cache: yes
+
 
     - name: Install Jenkins
       ansible.builtin.apt:
