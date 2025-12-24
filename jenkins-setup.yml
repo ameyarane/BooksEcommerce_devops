@@ -119,10 +119,32 @@
       ansible.builtin.debug:
         msg: "Jenkins initial password is {{ jenkins_password.stdout | default('Use SSH to retrieve manually if not shown.') }}"
     
+    - name: Download AWS CLI v2 installer
+      ansible.builtin.get_url:
+        url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+        dest: /tmp/awscliv2.zip
+        mode: '0644'
+
+    - name: Unzip AWS CLI v2 installer
+      ansible.builtin.unarchive:
+        src: /tmp/awscliv2.zip
+        dest: /tmp
+        remote_src: yes
+
     - name: Install AWS CLI v2
-      ansible.builtin.apt:
-        name: awscli
-        state: present   
+      ansible.builtin.shell: /tmp/aws/install --update
+      args:
+        creates: /usr/local/bin/aws
+
+    - name: Check AWS CLI version
+      ansible.builtin.command: aws --version
+      register: aws_cli_version
+      changed_when: false
+
+    - name: Show AWS CLI version
+      ansible.builtin.debug:
+        msg: "AWS CLI version: {{ aws_cli_version.stdout }}"
+
 
     # ----- SQL Server and Tools Setup (Ubuntu) -----
     - name: Import Microsoft GPG key for SQL Server
