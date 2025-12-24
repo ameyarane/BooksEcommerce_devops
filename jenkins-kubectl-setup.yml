@@ -29,10 +29,3 @@
       ansible.builtin.debug:
         msg: "kubectl version: {{ kubectl_version.stdout }}"
       tags: install_kubectl
-
-    - name: Copy kubectl to /usr/local/bin
-      ansible.builtin.copy:
-        src: /home/ubuntu/bin/kubectl
-        dest: /usr/local/bin/kubectl
-        mode: '0755'
-      tags: install_kubectl
