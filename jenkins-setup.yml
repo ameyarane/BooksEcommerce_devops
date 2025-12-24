@@ -25,10 +25,11 @@
         groups: docker
         append: yes
 
-    - name: Install Java (required for Jenkins)
+    - name: Install Java 17 (recommended for Jenkins)
       ansible.builtin.apt:
         name: openjdk-17-jdk
         state: present
+        update_cache: yes
 
     - name: Add Jenkins apt key
       ansible.builtin.apt_key:
@@ -39,6 +40,10 @@
       ansible.builtin.apt_repository:
         repo: 'deb https://pkg.jenkins.io/debian-stable binary/'
         state: present
+
+    - name: Update apt cache after adding Jenkins repo
+      ansible.builtin.apt:
+        update_cache: yes
 
     - name: Install Jenkins
       ansible.builtin.apt:
@@ -93,26 +98,18 @@
         name: awscli
         state: present
 
-    - name: Download kubectl binary
-      ansible.builtin.get_url:
-        url: "https://dl.k8s.io/release/v1.27.4/bin/linux/amd64/kubectl"
-        dest: /usr/local/bin/kubectl
-        mode: '0755'
+    - name: Install git
+      ansible.builtin.apt:
+        name: git
+        state: present     
 
-    - name: Verify kubectl version
-      ansible.builtin.command: kubectl version --client --short
-      register: kubectl_version
-      changed_when: false
+    - name: Check git version
+      ansible.builtin.shell: git --version
+      register: git_version      
 
-    - name: Show kubectl version
+    - name: Print git version
       ansible.builtin.debug:
-        msg: "kubectl version: {{ kubectl_version.stdout }}"
-
-    - name: Permission to docker sock 
-      ansible.builtin.file: 
-        path: /var/run/docker.sock
-        state: file 
-        mode: '0777'  
+        msg: "{{ git_version.stdout }}"      
 
     # ----- SQL Server and Tools Setup (Ubuntu) -----
     - name: Import Microsoft GPG key for SQL Server
