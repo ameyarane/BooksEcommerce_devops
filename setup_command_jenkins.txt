@@ -13,5 +13,41 @@ sudo systemctl restart docker
 Manage Jenkins → Manage Plugins => Install: Docker Pipeline, Amazon ECR, Pipeline, Kubernetes CLI, Credentials Binding Plugin
 
 
+Step: Configure Jenkins Job for GitHub Webhook
+Go to your Jenkins pipeline job.
+Click Configure.
+Under Build Triggers, check GitHub hook trigger for GITScm polling.
+Save.
+
+Step: Add Webhook in GitHub
+Go to your GitHub repository (e.g. ameyarane/BooksEcommerce).
+Go to Settings → Webhooks → Add webhook.
+Payload URL:
+http://your-jenkins-server:8080/github-webhook/
+
+
+#Manual Install mssql-tools and msodbcsql17
+
+sudo dnf install -y mssql-tools msodbcsql17
+curl -I https://packages.microsoft.com/config/rhel/8/prod.repo
+
+curl -I https://packages.microsoft.com/yumrepos/mssql-rhel-8-x86_64/
+
+sudo dnf clean all
+
+sudo pkill dnf
+
+aws configure
+
+aws eks update-kubeconfig --region eu-west-1 --name books-ecommerce-dev-eks
+kubectl edit configmap/aws-auth -n kube-system
+kubectl get nodes
+
+
+
+
+
+
+
 
 
