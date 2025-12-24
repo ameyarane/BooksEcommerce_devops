@@ -3,9 +3,18 @@
   become: yes
 
   tasks:
-    - name: Update Ubuntu base packages (no Jenkins repo yet)
-      ansible.builtin.apt:
-        update_cache: yes
+    - name: Remove old Jenkins repo sources if present
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/apt/sources.list.d/jenkins.list
+        - /etc/apt/sources.list.d/jenkins
+        - /etc/apt/trusted.gpg.d/jenkins.gpg
+
+    # - name: Update Ubuntu base packages (no Jenkins repo yet)
+    #   ansible.builtin.apt:
+    #     update_cache: yes
 
     - name: Install Docker
       ansible.builtin.apt:
