@@ -22,6 +22,10 @@ ls -l /home/ubuntu/.ssh/fqts-demo-key.pem
 
 sudo git clone https://github.com/ameyarane/BooksEcommerce_devops.git
 
+wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -
+sudo apt update
+
+
 ansible-playbook -i inventory.ini jenkins-setup.yml
 
 

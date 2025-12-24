@@ -31,19 +31,22 @@
         state: present
         update_cache: yes
 
-    - name: Add Jenkins apt key
-      ansible.builtin.apt_key:
+    - name: Add Jenkins apt key (modern method)
+      ansible.builtin.get_url:
         url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
-        state: present
+        dest: /etc/apt/trusted.gpg.d/jenkins.gpg
+        mode: '0644'
 
     - name: Add Jenkins apt repository
       ansible.builtin.apt_repository:
         repo: 'deb https://pkg.jenkins.io/debian-stable binary/'
+        filename: 'jenkins'
         state: present
 
     - name: Update apt cache after adding Jenkins repo
       ansible.builtin.apt:
         update_cache: yes
+
 
     - name: Install Jenkins
       ansible.builtin.apt:
