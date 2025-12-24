@@ -1,15 +1,36 @@
+# Create directory for your project
 mkdir BooksEcommerce_devops
-sudo dnf update -y
+
+# Update all packages
+sudo apt update -y
+sudo apt upgrade -y
+
+# Move into your project directory
 cd BooksEcommerce_devops/
-sudo dnf install git -y
-sudo dnf install -y ansible
-chmod 600 /home/ec2-user/.ssh/fqts-demo-key.pem
-ls -l /home/ec2-user/.ssh/fqts-demo-key.pem
-git clone https://github.com/ameyarane/BooksEcommerce_devops.git
-ansible-playbook -i inventory.ini jenkins-setup.yml --check
+
+# Install Git
+sudo apt install git -y
+
+# Install Ansible
+sudo apt install ansible -y
+
+# Set private key permissions (default Ubuntu user is "ubuntu")
+chmod 600 /home/ubuntu/.ssh/fqts-demo-key.pem
+
+# List key permissions
+ls -l /home/ubuntu/.ssh/fqts-demo-key.pem
+
+sudo git clone https://github.com/ameyarane/BooksEcommerce_devops.git
+
 ansible-playbook -i inventory.ini jenkins-setup.yml
+
+
+# Add the user 'jenkins' to the 'docker' group
 sudo usermod -aG docker jenkins
+
+# Restart the Docker service
 sudo systemctl restart docker
+
 Manage Jenkins → Manage Plugins => Install: Docker Pipeline, Amazon ECR, Pipeline, Kubernetes CLI, Credentials Binding Plugin
 
 
@@ -26,16 +47,30 @@ Payload URL:
 http://your-jenkins-server:8080/github-webhook/
 
 
-#Manual Install mssql-tools and msodbcsql17
+# Import the Microsoft GPG key
+curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
 
-sudo dnf install -y mssql-tools msodbcsql17
-curl -I https://packages.microsoft.com/config/rhel/8/prod.repo
+# Add the Microsoft SQL Server tools repository for Ubuntu 22.04 (Jammy)
+sudo add-apt-repository "$(curl -s https://packages.microsoft.com/config/ubuntu/22.04/prod.list)"
 
-curl -I https://packages.microsoft.com/yumrepos/mssql-rhel-8-x86_64/
+# Update package lists
+sudo apt update
 
-sudo dnf clean all
+# Install mssql-tools and msodbcsql17
+sudo apt install -y mssql-tools msodbcsql17
 
-sudo pkill dnf
+# (Optional) Check the repo connection
+curl -I https://packages.microsoft.com/config/ubuntu/22.04/prod.list
+curl -I https://packages.microsoft.com/ubuntu/22.04/prod
+
+# Clean apt cache (optional)
+sudo apt clean
+
+# Kill any apt processes (rarely needed, but for troubleshooting)
+sudo pkill apt
+
+
+
 
 aws configure
 
