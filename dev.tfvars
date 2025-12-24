@@ -15,7 +15,7 @@ subnet_ids        = ["subnet-0445ad7f30dc49eb0", "subnet-0ee3e27d41ca239d6"]
 # Capacity: "ON_DEMAND" or "SPOT"
 capacity_type     = "ON_DEMAND"
 
-disk_size         = 20
+disk_size         = 25
 
 # List of instance types for node group (e.g. ["t3.medium"])
 instance_type     = ["t3.medium"]

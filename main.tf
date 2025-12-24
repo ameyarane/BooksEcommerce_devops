@@ -73,4 +73,12 @@ resource "aws_instance" "jenkins" {
   }
 
   vpc_security_group_ids = var.sg_ids
+
+  # Add this block to set the root disk size
+  root_block_device {
+    volume_size = 25
+    volume_type = "gp3" # or "gp2" if you prefer
+    delete_on_termination = true
+  }
+
 }

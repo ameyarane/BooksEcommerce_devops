@@ -10,7 +10,7 @@ ansible-playbook -i inventory.ini jenkins-setup.yml --check
 ansible-playbook -i inventory.ini jenkins-setup.yml
 sudo usermod -aG docker jenkins
 sudo systemctl restart docker
-
+Manage Jenkins → Manage Plugins => Install: Docker Pipeline, Amazon ECR, Pipeline, Kubernetes CLI, Credentials Binding Plugin
 
 
 
