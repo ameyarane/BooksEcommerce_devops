@@ -3,10 +3,9 @@
   become: yes
 
   tasks:
-    - name: Update all packages
+    - name: Update Ubuntu base packages (no Jenkins repo yet)
       ansible.builtin.apt:
         update_cache: yes
-        upgrade: dist
 
     - name: Install Docker
       ansible.builtin.apt:
@@ -29,7 +28,6 @@
       ansible.builtin.apt:
         name: openjdk-17-jdk
         state: present
-        update_cache: yes
 
     - name: Download Jenkins GPG key (ASCII format)
       ansible.builtin.get_url:
