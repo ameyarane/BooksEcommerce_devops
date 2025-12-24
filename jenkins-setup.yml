@@ -119,6 +119,11 @@
       ansible.builtin.debug:
         msg: "Jenkins initial password is {{ jenkins_password.stdout | default('Use SSH to retrieve manually if not shown.') }}"
     
+    - name: Ensure unzip is installed 
+      ansible.builtin.apt:
+        name: unzip
+        state: present
+
     - name: Download AWS CLI v2 installer
       ansible.builtin.get_url:
         url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
