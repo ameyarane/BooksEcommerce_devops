@@ -39,9 +39,9 @@
         name: openjdk-17-jdk
         state: present
 
-    - name: Download Jenkins repo GPG key (ASCII)
+    - name: Download Jenkins repo GPG key (legacy, working for Ubuntu 22.04+)
       ansible.builtin.get_url:
-        url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
+        url: https://pkg.jenkins.io/debian/jenkins.io-2023.key
         dest: /tmp/jenkins.key
         mode: '0644'
 
@@ -70,7 +70,6 @@
     - name: Update apt cache after adding Jenkins repo
       ansible.builtin.apt:
         update_cache: yes
-
 
     - name: Install Jenkins
       ansible.builtin.apt:
