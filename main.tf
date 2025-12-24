@@ -62,7 +62,7 @@ resource "aws_ecr_repository" "frontend" {
 
 # Jenkins EC2 (Optional, same as before)
 resource "aws_instance" "jenkins" {
-  ami           = "ami-0a37b9296fbe95a93"
+  ami           = "ami-0ef0fafba270833fc"
   instance_type = "t2.medium"
   subnet_id     = var.subnet_ids[0]
   key_name      = var.ec2_ssh_key

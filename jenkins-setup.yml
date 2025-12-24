@@ -1,80 +1,83 @@
-- name: Setup Jenkins, Docker, and SQL Server on Amazon Linux 2023
+- name: Setup Jenkins, Docker, and SQL Server on Ubuntu 22.04 LTS
   hosts: jenkins
   become: yes
 
   tasks:
     - name: Update all packages
-      ansible.builtin.dnf:
-        name: "*"
-        state: latest
+      ansible.builtin.apt:
+        update_cache: yes
+        upgrade: dist
 
     - name: Install Docker
-      ansible.builtin.dnf:
-        name: docker
+      ansible.builtin.apt:
+        name: docker.io
         state: present
 
     - name: Enable and start Docker service
-      ansible.builtin.systemd_service:
+      ansible.builtin.systemd:
         name: docker
         enabled: true
         state: started
 
-    - name: Add ec2-user to docker group
+    - name: Add ubuntu user to docker group
       ansible.builtin.user:
-        name: ec2-user
+        name: ubuntu
         groups: docker
         append: yes
 
     - name: Install Java (required for Jenkins)
-      ansible.builtin.dnf:
-        name: java-17-amazon-corretto
+      ansible.builtin.apt:
+        name: openjdk-17-jdk
         state: present
 
-    - name: Add Jenkins repo
-      ansible.builtin.yum_repository:
-        name: jenkins
-        description: Jenkins repo
-        baseurl: http://pkg.jenkins.io/redhat-stable/
-        gpgcheck: no
+    - name: Add Jenkins apt key
+      ansible.builtin.apt_key:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io.key
+        state: present
+
+    - name: Add Jenkins apt repository
+      ansible.builtin.apt_repository:
+        repo: 'deb https://pkg.jenkins.io/debian-stable binary/'
+        state: present
 
     - name: Install Jenkins
-      ansible.builtin.dnf:
+      ansible.builtin.apt:
         name: jenkins
         state: present
 
     - name: Enable and start Jenkins service
-      ansible.builtin.systemd_service:
+      ansible.builtin.systemd:
         name: jenkins
         enabled: true
         state: started
 
-    - name: Ensure firewalld is installed
-      ansible.builtin.dnf:
-        name: firewalld
+    # ----- Firewall (ufw, Ubuntu default) -----
+    - name: Ensure ufw is installed
+      ansible.builtin.apt:
+        name: ufw
         state: present
 
-    - name: Ensure firewalld is running
-      ansible.builtin.systemd_service:
-        name: firewalld
-        enabled: true
-        state: started
+    - name: Allow Jenkins port 8080
+      community.general.ufw:
+        rule: allow
+        port: '8080'
+        proto: tcp
 
-    - name: Open Jenkins port 8080
-      ansible.posix.firewalld:
-        port: 8080/tcp
-        permanent: true
+    - name: Allow Docker port 2375 (optional)
+      community.general.ufw:
+        rule: allow
+        port: '2375'
+        proto: tcp
+
+    - name: Allow SQL Server port 1433
+      community.general.ufw:
+        rule: allow
+        port: '1433'
+        proto: tcp
+
+    - name: Ensure ufw is enabled
+      community.general.ufw:
         state: enabled
-        immediate: yes
-
-    - name: Open Docker port 2375 (optional, for remote API)
-      ansible.posix.firewalld:
-        port: 2375/tcp
-        permanent: true
-        state: enabled
-        immediate: yes
-
-    - name: Reload firewalld
-      ansible.builtin.command: firewall-cmd --reload
 
     - name: Print Jenkins initial admin password location
       ansible.builtin.shell: cat /var/lib/jenkins/secrets/initialAdminPassword
@@ -86,7 +89,7 @@
         msg: "Jenkins initial password is {{ jenkins_password.stdout | default('Use SSH to retrieve manually if not shown.') }}"
     
     - name: Install AWS CLI v2
-      ansible.builtin.dnf:
+      ansible.builtin.apt:
         name: awscli
         state: present
 
@@ -109,54 +112,42 @@
       ansible.builtin.file: 
         path: /var/run/docker.sock
         state: file 
-        mode: 0777  
+        mode: '0777'  
 
-     # ----- SQL Server and Tools Setup -----
+    # ----- SQL Server and Tools Setup (Ubuntu) -----
     - name: Import Microsoft GPG key for SQL Server
-      ansible.builtin.rpm_key:
+      ansible.builtin.apt_key:
+        url: https://packages.microsoft.com/keys/microsoft.asc
         state: present
-        key: https://packages.microsoft.com/keys/microsoft.asc
 
-    - name: Add Microsoft SQL Server repo
-      ansible.builtin.yum_repository:
-        name: mssql-server
-        description: Microsoft SQL Server 2022 Repo
-        baseurl: https://packages.microsoft.com/rhel/8/mssql-server-2022/
-        enabled: yes
-        gpgcheck: yes
+    - name: Add Microsoft SQL Server repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64] https://packages.microsoft.com/ubuntu/22.04/mssql-server-2022 jammy main"
+        state: present
 
-    - name: Add Microsoft prod repo for mssql-tools
-      ansible.builtin.get_url:
-        url: https://packages.microsoft.com/config/rhel/8/prod.repo
-        dest: /etc/yum.repos.d/msprod.repo
-        mode: '0644'
+    - name: Add Microsoft SQL Tools repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64] https://packages.microsoft.com/ubuntu/22.04/prod jammy main"
+        state: present
 
-    - name: Install required dependencies for mssql-tools
-      ansible.builtin.dnf:
+    - name: Install required dependencies for SQL Server and tools
+      ansible.builtin.apt:
         name:
-          - unixODBC
-          - unixODBC-devel
+          - unixodbc
+          - unixodbc-dev
         state: present
 
     - name: Install SQL Server 2022
-      ansible.builtin.dnf:
+      ansible.builtin.apt:
         name: mssql-server
         state: present
 
     - name: Install mssql-tools and msodbcsql17
-      ansible.builtin.dnf:
+      ansible.builtin.apt:
         name:
           - mssql-tools
           - msodbcsql17
         state: present
-        allow_downgrade: yes
-
-    - name: Open SQL Server port 1433
-      ansible.posix.firewalld:
-        port: 1433/tcp
-        permanent: true
-        state: enabled
-        immediate: yes
 
     - name: Configure SQL Server for unattended install
       ansible.builtin.shell: |
@@ -165,7 +156,7 @@
         creates: /var/opt/mssql/mssql.conf
 
     - name: Enable and start SQL Server
-      ansible.builtin.systemd_service:
+      ansible.builtin.systemd:
         name: mssql-server
         enabled: true
         state: started

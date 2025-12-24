@@ -1,26 +1,26 @@
-- name: Setup Jenkins and Docker on Amazon Linux 2023
-  hosts: jenkins 
+- name: Setup Jenkins and Docker on Ubuntu 22.04 LTS
+  hosts: jenkins
 
   tasks:
 
     - name: Ensure bin directory exists
       ansible.builtin.file:
-        path: /home/ec2-user/bin
+        path: /home/ubuntu/bin
         state: directory
         mode: '0755'
-        owner: ec2-user
-        group: ec2-user
+        owner: ubuntu
+        group: ubuntu
       tags: install_kubectl
-      
+
     - name: Download kubectl binary
       ansible.builtin.get_url:
         url: "https://dl.k8s.io/release/v1.27.4/bin/linux/amd64/kubectl"
-        dest: /home/ec2-user/bin/kubectl
+        dest: /home/ubuntu/bin/kubectl
         mode: '0755'
       tags: install_kubectl
 
     - name: Verify kubectl version
-      ansible.builtin.command: /home/ec2-user/bin/kubectl version --client --short
+      ansible.builtin.command: /home/ubuntu/bin/kubectl version --client --short
       register: kubectl_version
       changed_when: false
       tags: install_kubectl
@@ -30,4 +30,9 @@
         msg: "kubectl version: {{ kubectl_version.stdout }}"
       tags: install_kubectl
 
-   
+    - name: Copy kubectl to /usr/local/bin
+      ansible.builtin.copy:
+        src: /home/ubuntu/bin/kubectl
+        dest: /usr/local/bin/kubectl
+        mode: '0755'
+      tags: install_kubectl
