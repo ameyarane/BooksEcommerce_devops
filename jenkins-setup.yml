@@ -122,20 +122,7 @@
     - name: Install AWS CLI v2
       ansible.builtin.apt:
         name: awscli
-        state: present
-
-    - name: Install git
-      ansible.builtin.apt:
-        name: git
-        state: present     
-
-    - name: Check git version
-      ansible.builtin.shell: git --version
-      register: git_version      
-
-    - name: Print git version
-      ansible.builtin.debug:
-        msg: "{{ git_version.stdout }}"      
+        state: present   
 
     # ----- SQL Server and Tools Setup (Ubuntu) -----
     - name: Import Microsoft GPG key for SQL Server
