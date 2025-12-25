@@ -2,8 +2,6 @@
 sudo apt update -y
 sudo apt upgrade -y
 
-# Move into your project directory
-cd BooksEcommerce_devops/
 
 # Install Git
 sudo apt install git -y
@@ -17,10 +15,38 @@ chmod 600 /home/ubuntu/.ssh/fqts-demo-key.pem
 # List key permissions
 ls -l /home/ubuntu/.ssh/fqts-demo-key.pem
 
-sudo git clone https://github.com/ameyarane/BooksEcommerce_devops.git
-
 wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -
 sudo apt update
+
+# Import the Microsoft GPG key
+curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+
+# Add the Microsoft SQL Server tools repository for Ubuntu 22.04 (Jammy)
+sudo add-apt-repository "$(curl -s https://packages.microsoft.com/config/ubuntu/22.04/prod.list)"
+
+# Update package lists
+sudo apt update
+
+# Install mssql-tools and msodbcsql17
+sudo apt install -y mssql-tools msodbcsql17
+
+# (Optional) Check the repo connection
+curl -I https://packages.microsoft.com/config/ubuntu/22.04/prod.list
+curl -I https://packages.microsoft.com/ubuntu/22.04/prod
+
+# Clean apt cache (optional)
+sudo apt clean
+
+# Kill any apt processes (rarely needed, but for troubleshooting)
+sudo pkill apt
+
+
+
+sudo git clone https://github.com/ameyarane/BooksEcommerce_devops.git
+
+
+# Move into your project directory
+cd BooksEcommerce_devops/
 
 
 ansible-playbook -i inventory.ini jenkins-setup.yml
@@ -47,28 +73,6 @@ Go to Settings → Webhooks → Add webhook.
 Payload URL:
 http://your-jenkins-server:8080/github-webhook/
 
-
-# Import the Microsoft GPG key
-curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-
-# Add the Microsoft SQL Server tools repository for Ubuntu 22.04 (Jammy)
-sudo add-apt-repository "$(curl -s https://packages.microsoft.com/config/ubuntu/22.04/prod.list)"
-
-# Update package lists
-sudo apt update
-
-# Install mssql-tools and msodbcsql17
-sudo apt install -y mssql-tools msodbcsql17
-
-# (Optional) Check the repo connection
-curl -I https://packages.microsoft.com/config/ubuntu/22.04/prod.list
-curl -I https://packages.microsoft.com/ubuntu/22.04/prod
-
-# Clean apt cache (optional)
-sudo apt clean
-
-# Kill any apt processes (rarely needed, but for troubleshooting)
-sudo pkill apt
 
 
 
