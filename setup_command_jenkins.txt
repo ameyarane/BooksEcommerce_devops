@@ -75,6 +75,25 @@ http://your-jenkins-server:8080/github-webhook/
 
 
 
+kubectl run mssql-tools \
+  --rm -it --restart=Never \
+  --image=mcr.microsoft.com/mssql-tools \
+  -- bash
+
+
+sqlcmd -S mssql-service -U sa -P 'Cover@2025'
+
+
+CREATE DATABASE BooksEcommerceDb;
+GO
+USE BooksEcommerceDb;
+GO
+
+
+CREATE TABLE [dbo].[Books]( [Id] INT IDENTITY(1,1) PRIMARY KEY, [Title] NVARCHAR(MAX) NOT NULL, [Author] NVARCHAR(MAX) NOT NULL, [Price] DECIMAL(18, 2) NOT NULL ); GO
+
+
+
 
 
 aws configure
