@@ -232,3 +232,9 @@
         create: yes
         mode: '0755'
     # ----- SQL Server and Tools Setup END -----
+    - name: Download kubectl
+      ansible.builtin.get_url:
+        url: "https://dl.k8s.io/release/v1.27.4/bin/linux/amd64/kubectl"
+        dest: /usr/local/bin/kubectl
+        mode: '0755'
+
