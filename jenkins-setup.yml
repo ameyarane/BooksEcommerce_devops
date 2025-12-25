@@ -198,22 +198,6 @@
       ansible.builtin.apt:
         name: mssql-server
         state: present
-    
-    - name: Fix and clean broken installs
-      ansible.builtin.shell: apt-get -f install -y || true
-
-    - name: Accept msodbcsql17 and mssql-tools EULA
-      ansible.builtin.shell: |
-        echo "msodbcsql17 msodbcsql/ACCEPT_EULA boolean true" | debconf-set-selections
-        echo "mssql-tools mssql-tools/ACCEPT_EULA boolean true" | debconf-set-selections
-
-    - name: Install mssql-tools and msodbcsql17
-      ansible.builtin.apt:
-        name:
-          - mssql-tools
-          - msodbcsql17
-        state: present
-
 
     - name: Configure SQL Server for unattended install
       ansible.builtin.shell: |
