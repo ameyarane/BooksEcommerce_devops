@@ -34,6 +34,26 @@
         groups: docker
         append: yes
 
+    - name: Verify Docker service status explicitly
+      ansible.builtin.command: systemctl is-active docker
+      register: docker_status      
+
+    - name: Display Docker service status
+      ansible.builtin.debug:
+        msg: "Docker service is {{ docker_status.stdout }}"      
+
+    - name: Set permissions for docker.sock
+      ansible.builtin.file:
+        path: /var/run/docker.sock
+        state: file
+        mode: '0777'      
+
+    - name: Ensure Docker starts on boot (Ubuntu)
+      ansible.builtin.systemd:
+        name: docker
+        enabled: yes
+        state: started      
+
     - name: Install Java 17 (recommended for Jenkins)
       ansible.builtin.apt:
         name: openjdk-17-jdk
